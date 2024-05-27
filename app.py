@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
 from bson import json_util, ObjectId
+import random
+import string
 
 app = Flask(__name__)
 CORS(app)
@@ -75,9 +77,11 @@ def get_products():
         return json_util.dumps(items_list)
     
     elif request.method == 'POST':
-        product_data = request.json
-        products.insert_one(product_data)
-        return json_util.dumps(product_data), 201
+            product_data = request.json
+            if not product_data.get('id'):
+                product_data['id'] = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
+            products.insert_one(product_data)
+            return json_util.dumps(product_data), 201
 
 @app.route('/products/<id>', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def manage_product_by_id(id):
