@@ -49,28 +49,35 @@ def add_orders():
 def index():
     return 'Hello, World!'
 
-@app.route('/products', methods=['GET'])
+@app.route('/products', methods=['GET', 'POST',])
 def get_products():
-    query = {}
 
-    product_types = request.args.getlist('type')
-    manufacturer = request.args.get('manufacturer')
-    max_price = request.args.get('price')
+    if request.method == 'GET':
+        query = {}
 
-    if product_types:
-        query["type"] = {"$in": product_types}
+        product_types = request.args.getlist('type')
+        manufacturer = request.args.get('manufacturer')
+        max_price = request.args.get('price')
 
-    if manufacturer:
-        query["manufacturer"] = manufacturer
+        if product_types:
+            query["type"] = {"$in": product_types}
 
-    if max_price:
-        query["price"] = {"$lte": float(max_price)}
+        if manufacturer:
+            query["manufacturer"] = manufacturer
 
-    result = products.find(query)
+        if max_price:
+            query["price"] = {"$lte": float(max_price)}
 
-    items_list = list(result)
+        result = products.find(query)
 
-    return json_util.dumps(items_list)
+        items_list = list(result)
+
+        return json_util.dumps(items_list)
+    
+    elif request.method == 'POST':
+        product_data = request.json
+        products.insert_one(product_data)
+        return json_util.dumps(product_data), 201
 
 @app.route('/products/<id>', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def manage_product_by_id(id):
@@ -78,11 +85,6 @@ def manage_product_by_id(id):
         query = {"id": id}
         result = products.find_one(query)
         return json_util.dumps(result)
-
-    elif request.method == 'POST':
-        product_data = request.json
-        products.insert_one(product_data)
-        return json_util.dumps(product_data), 201
 
     elif request.method == 'PATCH':
         update_data = request.json
