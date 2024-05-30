@@ -35,14 +35,23 @@ def add_products():
         {"id": "17", "name": "ZMA Supplement", "price": 17.99, "manufacturer": "bulksupplements", "type": "mineral", "description": "Zinc, magnesium, and vitamin B6 supplement", "availability": 20, "image": "https://proteini.lv/8091-large_default/optimum-nutrition-zma-90-caps.jpg"},
         {"id": "18", "name": "Joint Support Supplement", "price": 15.99, "manufacturer": "bulksupplements", "type": "supplement", "description": "Supports joint health and flexibility", "availability": 32, "image": "https://www.nutritjet.com/wp-content/uploads/2021/06/1-6-600x600.jpg"},
         {"id": "19", "name": "Amino Acid Supplement", "price": 22.99, "manufacturer": "bulksupplements", "type": "amino_acid", "description": "Essential amino acids for muscle recovery", "availability": 24, "image": "https://nowfoods.ca/wp-content/uploads/2022/03/NOW80051_01.png"},
-        {"id": "20", "name": "Carb Supplement", "price": 11.99, "manufacturer": "bulksupplements", "type": "carbohydrate", "description": "Fast-acting carbohydrate powder", "availability": 26, "image": "https://muscleadd.com/cdn/shop/files/BlueBerry_1800x1800.jpg?v=1696116083"}
+        {"id": "20", "name": "Carb Supplement", "price": 11.99, "manufacturer": "bulksupplements", "type": "carbohydrate", "description": "Fast-acting carbohydrate powder", "availability": 26, "image": "https://muscleadd.com/cdn/shop/files/BlueBerry_1800x1800.jpg?v=1696116087"}
     ]
-    
+
     products.insert_many(product_data)
 
 def add_orders():
     orders_data = [
-        {'name': 'Robert Shalajev', 'email': 'roberts.shalajevs@gmail.com', 'phone': '+37129930395', 'address': 'Jana Enzdelina iela', 'comment': ''}
+        {"name": "Robert Shalajev", "email": "roberts.shalajevs@gmail.com", "phone": "+37129930395", "address": "Jana Enzdelina iela", "comment": ""},
+        {"name": "Anna Ivanova", "email": "anna.ivanova@example.com", "phone": "+37128830492", "address": "Brivibas iela 12", "comment": "Piegāde pēc 18:00"},
+        {"name": "Mikhail Petrov", "email": "mikhail.petrov@example.com", "phone": "+37126759301", "address": "Kalku iela 5", "comment": "Zvanīt stundu pirms piegādes"},
+        {"name": "Elena Smirnova", "email": "elena.smirnova@example.com", "phone": "+37129910029", "address": "Terbatas iela 15", "comment": "Bez komentāriem"},
+        {"name": "Alexey Kuznetsov", "email": "alexey.kuznetsov@example.com", "phone": "+37129110385", "address": "Stabu iela 23", "comment": "Atstāt pie durvīm"},
+        {"name": "Irina Pavlova", "email": "irina.pavlova@example.com", "phone": "+37126485930", "address": "Valnu iela 30", "comment": "Piegāde tikai darba dienās"},
+        {"name": "Dmitry Sokolov", "email": "dmitry.sokolov@example.com", "phone": "+37129847461", "address": "Elizabetes iela 19", "comment": "Nezvanīt, rakstīt SMS"},
+        {"name": "Olga Romanova", "email": "olga.romanova@example.com", "phone": "+37126593748", "address": "Raina bulvaris 8", "comment": "Vakara piegāde"},
+        {"name": "Nikolay Vasiliev", "email": "nikolay.vasiliev@example.com", "phone": "+37129374829", "address": "Krišjāņa Valdemāra iela 11", "comment": "Neatstāt reģistratūrā"},
+        {"name": "Tatiana Morozova", "email": "tatiana.morozova@example.com", "phone": "+37129637284", "address": "Krasta iela 44", "comment": "Piegāde no 12:00 līdz 14:00"}
     ]
 
     orders.insert_many(orders_data)
@@ -120,6 +129,14 @@ def get_cart():
 @app.route('/orders', methods=['POST'])
 def get_checkout():
     orders_data = request.json
+    product_ids = orders_data.get("products", [])
+
+    for product_id in product_ids:
+        product = products.find_one({"id": str(product_id)})
+        if product and int(product.get("availability", 0)) > 0:
+            new_availability = int(product["availability"]) - 1
+            products.update_one({"id": str(product_id)}, {"$set": {"availability": new_availability}})
+
     orders.insert_one(orders_data)
     return json_util.dumps(orders_data)
 
