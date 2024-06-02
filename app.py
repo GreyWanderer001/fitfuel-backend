@@ -60,6 +60,12 @@ def add_orders():
 def index():
     return 'Hello, World!'
 
+@app.route('/order', methods=['GET'])
+def get_orders():
+    if request.method == 'GET':
+        orders_list=list(orders.find())
+        return json_util.dumps(orders_list)
+
 @app.route('/products', methods=['GET', 'POST',])
 def get_products():
 
